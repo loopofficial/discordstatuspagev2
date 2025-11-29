@@ -1,79 +1,87 @@
-# 🌐 Discord Service Monitor Bot
+# Discord Service Monitor Bot
 
-Welcome to the **Discord Service Monitor Bot**! This bot is your all-in-one solution for monitoring the health of your online services directly from your Discord server. Whether you’re managing a web hosting platform, game servers, or any other critical online infrastructure, this bot keeps you informed and prepared for any situation.
+Monitor websites and servers from Discord with a live status dashboard, incident reporting, and alerts.
 
-## 🚀 Features
+## Features
+- Live dashboard: One embed updated in-place with service status, latency, and downtime.
+- Incidents: Auto-created when services go down; shows downtime on recovery; clear via button.
+- Alerts: Clean `@everyone` ping and DMs to a specific role (skips bots and users with DMs off).
+- Command: `!status` returns the current dashboard embed on demand.
+- Config-driven: `.env` for secrets, `config.py` for services and thresholds.
 
-- **Real-Time Monitoring:** Keep an eye on your websites and servers 24/7 with real-time status updates.
-- **Customizable Latency Alerts:** Set custom thresholds for latency to detect when a service is underperforming.
-- **Instant Incident Notifications:** Get immediate alerts when services go down, complete with automatic role-based notifications.
-- **Interactive Status Dashboard:** View live updates of your service status in a beautifully formatted Discord embed.
-- **Incident Management:** Manage and clear incidents directly through Discord with interactive buttons.
+## Requirements
+- Python 3.8+
+- Discord bot permissions: Send Messages, Embed Links, Manage Messages, Read Message History
+- Enable "Server Members Intent" in Developer Portal
 
-## 🎯 Why Use This Bot?
+## Setup (Windows PowerShell)
+```powershell
+git clone https://github.com/loopofficial/discordstatuspage.git
+cd discordstatuspage
 
-In today’s fast-paced digital world, uptime and performance are everything. This bot empowers you to:
+python -m venv venv
+./venv/Scripts/Activate.ps1
+pip install -r requirements.txt
 
-- **React Quickly:** With instant alerts, you and your team can respond to issues before they become critical.
-- **Stay Informed:** Regular updates keep everyone on the same page, minimizing downtime and service disruptions.
-- **Collaborate Effectively:** Role-based notifications ensure that the right team members are notified instantly, reducing response times.
+Copy-Item .env.example .env
+# Edit .env: DISCORD_TOKEN, CHANNEL_ID, ALERT_CHANNEL_ID, ALERT_ROLE_NAME
 
-## 🛠️ Getting Started
+# Configure services in config.py (ServiceConfig.from_env)
+python main.py
+```
 
-### Prerequisites
+## Configure Services
+Edit `config.py` → `ServiceConfig.from_env()` with your targets:
+```python
+return cls(
+    websites=["https://your-website.com", "https://api.your-service.com/health"],
+    servers={"Game Server": "192.168.1.100"},
+    latency_thresholds={"Game Server": 50},
+    service_categories={"Websites": ["https://your-website.com"], "Servers": ["Game Server"]}
+)
+```
 
-- **Python 3.7+**: Ensure you have the latest version of Python installed.
-- **Discord Bot Token**: Create a bot on the [Discord Developer Portal](https://discord.com/developers/applications) and get your bot token.
-- **Dependencies:** Install the necessary Python packages:
-  ```bash
-  pip install discord.py requests
-  ```
+## Monitoring Settings
+- `ping_attempts` (default 3)
+- `ping_delay` seconds (0.5)
+- `http_timeout` seconds (5)
+- `failure_threshold` consecutive failures (3)
+- `update_interval` seconds (10)
+- `slow_alert_cooldown_minutes` (30)
+- `default_latency_threshold` ms (100)
 
-### Installation
+## Discord Setup
+1. Create application → add Bot.
+2. Enable Server Members Intent.
+3. OAuth2 URL generator: scopes `bot`, `applications.commands`; permissions above.
+4. Invite bot to your server.
 
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/loopofficial/discordstatuspage.git
-   cd discordstatuspage
-   ```
+## Project Structure
+```
+├── main.py
+├── bot.py
+├── config.py
+├── models.py
+├── monitor.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── .github/workflows/ci.yml
+```
 
-2. **Configure your bot**:
-   - Replace the `DISCORD_TOKEN` in `discordalerts.py` with your bot's token.
-   - Update the `CHANNEL_ID` and `ALERT_CHANNEL_ID` with the IDs of the channels where you want the bot to send updates.
-   - Add the websites and IPs you want to monitor in the `websites` and `ips` dictionaries.
+## Docker (optional)
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "main.py"]
+```
+```bash
+docker build -t discord-monitor .
+docker run -d --env-file .env discord-monitor
+```
 
-3. **Run the bot**:
-   ```bash
-   python discordalerts.py
-   ```
-
-### Customization
-
-- **Latency Thresholds:** Customize the latency alert thresholds by editing the `latency_thresholds` dictionary.
-- **Ping Configuration:** Adjust `ping_attempts` and `ping_delay` to fine-tune the monitoring process.
-
-## 💡 Example Use Cases
-
-- **Website Uptime Monitoring:** Ensure your site is always available to users.
-- **Game Server Health Check:** Monitor latency and uptime for your gaming servers, alerting admins when something goes wrong.
-- **Critical Service Monitoring:** Keep track of essential services like databases, API endpoints, and more.
-
-## 👥 Contributing
-
-Have ideas to improve the bot? Contributions are welcome! Feel free to fork the repository and submit a pull request. Whether it’s new features, bug fixes, or documentation improvements, we’d love your help!
-
-## 📝 License
-
-This project is licensed under the NonCommercial 4.0 International (CC BY-NC 4.0) License. See the [LICENSE](LICENSE) file for more details.
-
----
-
-### 🌟 Star This Repository
-
-If you find this project useful, please consider starring the repository! It helps others find it and shows your support.
-
----
-
-### 📬 Support
-
-Need help? Feel free to open an issue on GitHub, or reach out to me via Discord.
+## License
+Creative Commons Attribution-NonCommercial 4.0 International. See `LICENSE`.
