@@ -85,3 +85,12 @@ docker run -d --env-file .env discord-monitor
 
 ## License
 Creative Commons Attribution-NonCommercial 4.0 International. See `LICENSE`.
+
+## What's New (v2 Revamp)
+- Complete refactor to a modular structure (`main.py`, `bot.py`, `config.py`, `monitor.py`, `models.py`).
+- Live status dashboard with categories, latency display, and downtime tracking.
+- Incident embeds auto-create on outages, update on recovery, and include a Clear button.
+- Robust alerting: skips bots and users with DMs disabled; clean `@everyone` notification.
+- Config-driven setup: `.env` for secrets; `config.py` for services and thresholds.
+- `!status` command to fetch the current dashboard on demand.
+- Minimal CI workflow to validate imports on push.
